@@ -1,5 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd"></mule>
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="8790cee0-a561-4657-8406-3949515a0071" >
+		<salesforce:cached-basic-connection username="${sfdc.user}" password="${sfdc.pwd}" securityToken="${sfdc.token}" />
+	</salesforce:sfdc-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="38d4db79-ee04-48ed-aed1-5c3bc0ce5df6" file="secrets.yaml" />
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="cdd2861f-7b6c-4504-b492-71faa003bc88" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="webServer" doc:id="b9a4c482-e22a-4c2c-85e0-7082b6f4e457" >
+		<http:listener doc:name="/connect" doc:id="8a7372a8-24f8-4975-a6fe-59f8999d5ec9" config-ref="HTTP_Listener_config" path="/connect"/>
+		<flow-ref doc:name="Flow Reference" doc:id="16def2a8-26c6-4493-9b1b-ac8e5bbcae6d" name="connect-salesforce-file"/>
+	</flow>
+	<flow name="connect-salesforce-file" doc:id="3c32b067-1a30-4aa6-9581-02419256f063" >
+		<salesforce:query doc:name="Query" doc:id="7c69ba3d-453e-49bf-b93b-8c5b7699f4fa" config-ref="Salesforce_Config">
+			<salesforce:salesforce-query >SELECT Name, Phone FROM Account LIMIT 10</salesforce:salesforce-query>
+		</salesforce:query>
+		<ee:transform doc:name="Transform Message" doc:id="24b44c84-ece9-4ca3-9063-b0f6ddde93cb" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

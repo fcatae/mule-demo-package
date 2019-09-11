@@ -3,6 +3,8 @@ Conectividade Ágil
 
 ## Apresentar o Exchange ##
 
+Como conectar rapidamente com meus sistemas legados?
+
 Tópicos:
 1. Repositório privado e público
 2. Conector Salesforce

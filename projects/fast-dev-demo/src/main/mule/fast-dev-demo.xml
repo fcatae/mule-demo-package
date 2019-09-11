@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
-	xmlns:http="http://www.mulesoft.org/schema/mule/http"
-	xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+<mule xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:ftp="http://www.mulesoft.org/schema/mule/ftp"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:salesforce="http://www.mulesoft.org/schema/mule/salesforce" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/salesforce http://www.mulesoft.org/schema/mule/salesforce/current/mule-salesforce.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
 http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
-http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ftp http://www.mulesoft.org/schema/mule/ftp/current/mule-ftp.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd">
 	<salesforce:sfdc-config name="Salesforce_Config" doc:name="Salesforce Config" doc:id="8790cee0-a561-4657-8406-3949515a0071" >
 		<salesforce:cached-basic-connection username="${sfdc.user}" password="${sfdc.pwd}" securityToken="${sfdc.token}" />
 	</salesforce:sfdc-config>
@@ -14,6 +16,15 @@ http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/fil
 	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="cdd2861f-7b6c-4504-b492-71faa003bc88" >
 		<http:listener-connection host="0.0.0.0" port="8081" />
 	</http:listener-config>
+	<file:config name="File_Config" doc:name="File Config" doc:id="ada06a92-c280-41a8-89f0-f7175f0cfab1" >
+		<file:connection />
+	</file:config>
+	<ftp:config name="FTP_Config" doc:name="FTP Config" doc:id="c8e49d78-d6cb-4452-88b3-e7eedfd0360c" >
+		<ftp:connection host="localhost" />
+	</ftp:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="4d97a3ec-3514-4622-8159-80ebd4ac3174" >
+		<db:my-sql-connection host="localhost" port="3306" />
+	</db:config>
 	<flow name="webServer" doc:id="b9a4c482-e22a-4c2c-85e0-7082b6f4e457" >
 		<http:listener doc:name="/connect" doc:id="8a7372a8-24f8-4975-a6fe-59f8999d5ec9" config-ref="HTTP_Listener_config" path="/connect"/>
 		<flow-ref doc:name="Flow Reference" doc:id="16def2a8-26c6-4493-9b1b-ac8e5bbcae6d" name="connect-salesforce-file"/>
@@ -30,5 +41,6 @@ output application/json
 payload]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+		<file:write doc:name="Write" doc:id="35482c47-aef1-4a1b-a98c-08291f7566e1" config-ref="File_Config" path="output.txt"/>
 	</flow>
 </mule>

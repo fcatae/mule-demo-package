@@ -25,10 +25,9 @@ http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/cu
 	<db:config name="Database_Config" doc:name="Database Config" doc:id="4d97a3ec-3514-4622-8159-80ebd4ac3174" >
 		<db:my-sql-connection host="localhost" port="3306" />
 	</db:config>
-	<flow name="webServer" doc:id="b9a4c482-e22a-4c2c-85e0-7082b6f4e457" >
-		<http:listener doc:name="/connect" doc:id="8a7372a8-24f8-4975-a6fe-59f8999d5ec9" config-ref="HTTP_Listener_config" path="/connect"/>
-		<flow-ref doc:name="Flow Reference" doc:id="16def2a8-26c6-4493-9b1b-ac8e5bbcae6d" name="transform-demo"/>
-	</flow>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="fa24a722-4a28-4d20-ab40-3f5230e4e40a" >
+		<http:request-connection host="localhost" port="8081" />
+	</http:request-config>
 	<flow name="connectors-demo" doc:id="3c32b067-1a30-4aa6-9581-02419256f063" >
 		<salesforce:query doc:name="Query" doc:id="7c69ba3d-453e-49bf-b93b-8c5b7699f4fa" config-ref="Salesforce_Config">
 			<salesforce:salesforce-query >SELECT Name, Phone FROM Account LIMIT 10</salesforce:salesforce-query>
@@ -59,5 +58,34 @@ output application/json
 }]]></ee:set-payload>
 			</ee:message>
 		</ee:transform>
+	</flow>
+	<flow name="controlflow-demo" doc:id="ffd994f7-e256-4f21-b9a5-9923ef557534" >
+		<set-variable value="" doc:name="Set Variable" doc:id="f971fdbf-370f-4c44-a520-d2a3a79e3814" variableName="user"/>
+		<scatter-gather doc:name="Scatter-Gather" doc:id="4415ae9e-e712-4972-afb9-c71ca90208c5" >
+			<route >
+				<http:request method="GET" doc:name="Request" doc:id="5714df0a-0461-46e7-8aec-61f55194dfd5" config-ref="HTTP_Request_configuration"/>
+			</route>
+			<route >
+				<db:update doc:name="Update" doc:id="38dd8864-56fc-465c-9be0-3a9d47839a8f" config-ref="Database_Config">
+					<db:sql >UPDATE</db:sql>
+				</db:update>
+			</route>
+			<route >
+				<salesforce:create type="Account" doc:name="Create" doc:id="37bab363-991c-4641-a6e9-ebb516e2f36d" config-ref="Salesforce_Config"/>
+			</route>
+		</scatter-gather>
+		<ee:transform doc:name="Transform Message" doc:id="90881fd2-15c5-4ef0-8a6b-ddd55afbcad1" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+{
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="webServer" doc:id="b9a4c482-e22a-4c2c-85e0-7082b6f4e457">
+		<http:listener doc:name="/connect" doc:id="8a7372a8-24f8-4975-a6fe-59f8999d5ec9" config-ref="HTTP_Listener_config" path="/connect" />
+		<flow-ref doc:name="Flow Reference" doc:id="16def2a8-26c6-4493-9b1b-ac8e5bbcae6d" name="transform-demo" />
 	</flow>
 </mule>
